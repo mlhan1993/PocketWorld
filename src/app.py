@@ -19,17 +19,24 @@ class APP(object):
 
     def add_routes(self):
         self.app.add_url_rule('/shorten', view_func=self.shorten, methods=['POST'])
-        self.app.add_url_rule('/', view_func=self.get, methods=['GET'])
+        self.app.add_url_rule('/<short_url>', view_func=self.get, methods=['GET'])
 
     def shorten(self):
-        url = request.form.get('url')
+        data = request.get_json()
+        url = data.get('url')
+        # TODO proper response with empty url
+        if not url:
+            return "empty url"
         key = self.url_shortener.get_key()
-        print(key)
+        # TODO handle case where the put failed (internal server error)
+        # TODO handle repeated key
+        self.db.put(key, url)
         return "done"
 
-    def get(self):
-        print(self.db.get("xyz"))
-        url = "google.ca"
+    def get(self, short_url):
+        # TODO handle case when db.get raise exception
+        # TODO handle case when db.get return nothing
+        url = self.db.get(short_url)
         return redirect(url)
 
     def run(self):

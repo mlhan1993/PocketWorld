@@ -14,18 +14,28 @@ class DB(object):
         self.table = self.db.Table(config.table_name)
 
     def get(self, key):
+        # TODO handle case where the key is not found
+        # TODO handle connection issues
+        # TODO add connection timeout
+        # TODO handle non-200 response
         response = self.table.get_item(Key={
-            "shortURL": {"S": "xyz"}
+            "shortURL": key
         })
+
         item = response['Item']
-        return item
+        url = item['longURL']
+        return url
 
     def put(self, key, value):
+        # TODO handle repeat key entry
+
         response = self.table.put_item(Item={
-            key: value
+            "shortURL": key,
+            "longURL": value,
         }, Expected={
             key: {
                 'Exists': False
             }
         })
+
         return response
